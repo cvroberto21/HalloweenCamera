@@ -8,7 +8,7 @@ import android.os.HandlerThread
 import android.util.Log
 import android.view.Surface
 
-class RGBImageReader {
+class RGBImageReader(width: Int, height: Int, format: Int = ImageFormat.YUV_420_888, maxImages: Int = 5) {
     val jni  = JNILink()
 
     private val imageReader: ImageReader
@@ -16,8 +16,8 @@ class RGBImageReader {
     private val listener = ImageReader.OnImageAvailableListener {
         val image = it.acquireLatestImage()
         if (image != null ) {
-            val format = it.imageFormat
-            Log.d(TAG, "Image format" + format)
+            val fmt = it.imageFormat
+            Log.d(TAG, "Image format" + fmt)
             val planes = image.planes
 
             Log.d(TAG, "Acquired image " + planes.size )
@@ -38,10 +38,7 @@ class RGBImageReader {
 //
 //        }
 //    }
-
-
-    @JvmOverloads
-    constructor(width: Int, height: Int, format: Int = ImageFormat.YUV_420_888, maxImages: Int = 5) {
+    init {
         imageReader = ImageReader.newInstance(width, height, format, maxImages)
 
         val thread = HandlerThread("RGBImageReader")
