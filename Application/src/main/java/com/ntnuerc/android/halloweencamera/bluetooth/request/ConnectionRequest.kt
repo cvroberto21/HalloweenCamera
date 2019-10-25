@@ -4,16 +4,22 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import android.content.Context
+import android.util.Log
 import com.ntnuerc.android.halloweencamera.bluetooth.IBluetoothEventListener
 import java.io.IOException
 import java.util.*
 
-private const val BASE_UUID = "00000000-0000-1000-8000-00805F9B34FB"
+private const val ACP_BASE_UUID = "00000000-0000-1000-8000-00805F9B34FB"
+private const val SPP_BASE_UUID = "00001101-0000-1000-8000-00805f9b34fb"
 
 class ConnectionRequest(private val context : Context, private val eventListener: IBluetoothEventListener) : IBluetoothRequest {
     private var connectionThread : ConnectionThread? = null
+    private val bluetoothAdapter : BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
 
-    fun conntect(device: BluetoothDevice) {
+    fun connect(device: BluetoothDevice) {
+
+        // bluetoothAdapter.cancelDiscovery() Donce in thread
+
         eventListener.onConnecting()
         connectionThread = ConnectionThread(device)
         { isSuccess -> eventListener.onConnected(isSuccess)}
@@ -29,24 +35,40 @@ class ConnectionRequest(private val context : Context, private val eventListener
         stopConnect()
     }
 
+    fun connectPairedDevice( name: String ) {
 
-    private class ConnectionThread(private val device : BluetoothDevice,
+        val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter.bondedDevices
+        pairedDevices?.forEach { device ->
+            val deviceName = device.name
+            // val deviceHardwareAddress = device.address // MAC address
+
+            Log.d("SPP", "Paired device " + deviceName )
+            if ( deviceName == name ) {
+                connect( device )
+            }
+        }
+    }
+
+    inner class ConnectionThread(private val device : BluetoothDevice,
                                    private val onComplete: (isSuccess : Boolean) -> Unit) : Thread() {
 
-        private var bluetoothAdapter : BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+        //private var bluetoothAdapter : BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
         private var bluetoothSocket : BluetoothSocket? = createSocket()
 
         private fun createSocket() : BluetoothSocket? {
             var socket : BluetoothSocket? = null
 
             try {
-                val uuid = if (device.uuids.size > 0)
-                    device.uuids[0].uuid
-                else UUID.fromString(BASE_UUID)
-
+//                val uuid = if (device.uuids.size > 0)
+//                                device.uuids[0].uuid
+//                            else
+//                                UUID.fromString(ACP_BASE_UUID)
+                val uuid = UUID.fromString(SPP_BASE_UUID)
                 socket = device.createRfcommSocketToServiceRecord(uuid)
             }
-            catch (e : IOException) {}
+            catch (e : IOException) {
+
+            }
 
             return socket
         }
@@ -64,7 +86,9 @@ class ConnectionRequest(private val context : Context, private val eventListener
                 }
 
             }
-            catch (e: Exception) { }
+            catch (e: Exception) {
+                Log.i( "SPP", "Connection failed")
+            }
 
             onComplete(isSuccess)
         }

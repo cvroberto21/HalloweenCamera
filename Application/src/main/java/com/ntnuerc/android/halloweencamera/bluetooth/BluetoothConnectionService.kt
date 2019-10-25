@@ -7,16 +7,19 @@ import android.content.Context
 import com.ntnuerc.android.halloweencamera.bluetooth.request.*
 
 
-class BluetoothConnectionService(val context: Context) {
-    private var eventListener : IBluetoothEventListener = EmptyBluetoothEventListener()
-    private val enableRequest = EnableRequest(context, eventListener)
-    private val discoverRequest = DiscoverRequest(context, eventListener)
-    private val pairRequest = PairRequest(context, eventListener)
-    private val connectionRequest = ConnectionRequest(context, eventListener)
-    private val audioConnectionRequest = AudioConnectionRequest(context, eventListener)
+class BluetoothConnectionService(val context: Context ) {
+    var eventListener : IBluetoothEventListener = EmptyBluetoothEventListener()
+    val enableRequest = EnableRequest(context, eventListener)
+    val pairRequest = PairRequest(context, eventListener)
+    val audioConnectionRequest = AudioConnectionRequest(context, eventListener)
+    var discoverRequest = DiscoverRequest(context, eventListener)
+    var connectionRequest = ConnectionRequest(context, eventListener)
 
     fun setBluetoothEventListener(listener: IBluetoothEventListener) {
         eventListener = listener
+
+        discoverRequest = DiscoverRequest( context, eventListener )
+        connectionRequest = ConnectionRequest( context, eventListener )
     }
 
     fun enableBluetoothAdapter() {
@@ -36,7 +39,20 @@ class BluetoothConnectionService(val context: Context) {
     }
 
     fun connectDevice(device: BluetoothDevice) {
-        connectionRequest.conntect(device)
+        connectionRequest.connect(device)
+    }
+
+    fun connectDevice(name: String) {
+        for (dev in discoverRequest.discoveredDevices ) {
+            if ( dev.name == name ) {
+                connectDevice(dev)
+                break
+            }
+        }
+    }
+
+    fun connectPairedDevice(name: String) {
+        connectionRequest.connectPairedDevice( name )
     }
 
     fun stopConnectDevice() {
