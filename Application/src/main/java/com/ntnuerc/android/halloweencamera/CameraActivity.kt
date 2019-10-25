@@ -29,9 +29,6 @@ class CameraActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_camera)
-        val sppBluetoothEventListener = SPPBluetoothEventListener( bluetoothConnectionService)
-        bluetoothConnectionService.setBluetoothEventListener( sppBluetoothEventListener )
-        bluetoothConnectionService.discoverDevices()
 
         val frag = Camera2VideoFragment.newInstance()
         savedInstanceState ?: supportFragmentManager.beginTransaction()

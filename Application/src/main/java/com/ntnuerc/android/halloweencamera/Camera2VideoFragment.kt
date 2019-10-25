@@ -578,31 +578,4 @@ class Camera2VideoFragment : Fragment(), View.OnClickListener,
     companion object {
         fun newInstance(): Camera2VideoFragment = Camera2VideoFragment()
     }
-
-//    private fun startBluetooth( ) {
-//        val bAdapter = BluetoothAdapter.getDefaultAdapter()
-//        if(bAdapter!=null)
-//        {
-//            if( !bAdapter.isEnabled() ) {
-//                val intVal: Int = 1
-//                val eintent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-//                startActivityForResult(eintent, intVal)
-//            }
-//
-//            val dIntent =  Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE)
-//            dIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300)
-//            startActivity(dIntent);
-//
-//            val pairedDevices = bAdapter.bondedDevices;
-//            if ( pairedDevices.size > 0 ) {
-//    // There are paired devices. Get the name and address of each paired device.
-//                for (device in pairedDevices) {
-//                    val deviceName = device.name
-//                    val deviceHardwareAddress = device.address
-//                    Log.d( TAG, "Paired bluetooth device " + deviceName + ", address " + deviceHardwareAddress )
-//                }
-//            }
-//        }
-//
-//    }
 }
