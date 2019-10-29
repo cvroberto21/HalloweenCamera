@@ -29,7 +29,7 @@
         android:icon="@drawable/ic_launcher"
         android:theme="@style/MaterialTheme">
 
-        <activity android:name="com.ntnuerc.android.halloweencamera.CameraActivity"
+        <activity android:name="com.ntnuerc.android.halloweencamera.HalloweenCameraActivity"
                   android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

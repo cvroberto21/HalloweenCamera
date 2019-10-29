@@ -1,15 +1,15 @@
-package com.ntnuerc.android.halloweencamera.bluetooth
+package com.ntnuerc.android.halloweencamera
 
 import android.bluetooth.BluetoothSocket
+import android.os.Bundle
 import android.os.Handler
 import android.util.Log
-import android.os.Bundle
-
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 
-const val TAG = "VideoService"
+private const val TAG = "VideoClientRunner"
+
 // Defines several constants used when transmitting messages between the
 // service and the UI.
 const val MESSAGE_READ: Int = 0
@@ -17,11 +17,26 @@ const val MESSAGE_WRITE: Int = 1
 const val MESSAGE_TOAST: Int = 2
 // ... (Add other message types here as needed.)
 
-class VideoService(
-        // handler that gets info from Bluetooth service
-        private val handler: Handler) {
+class VideoClientRunnerThread {
 
-    private inner class ConnectedThread(private val mmSocket: BluetoothSocket) : Thread() {
+    private val connectThread : ConnectedThread? = null
+    private var handler : Handler? = null
+
+    fun connect( socket : BluetoothSocket, handler : Handler ) {
+        val connectThread = ConnectedThread( socket, handler )
+        this.handler = handler
+        connectThread.start()
+    }
+
+    fun disconnect( ) {
+        connectThread?.cancel()
+    }
+
+    fun write(bytes: ByteArray) {
+        connectThread?.write( bytes )
+    }
+
+    private inner class ConnectedThread(private val mmSocket: BluetoothSocket, private val handler : Handler) : Thread() {
 
         private val mmInStream: InputStream = mmSocket.inputStream
         private val mmOutStream: OutputStream = mmSocket.outputStream

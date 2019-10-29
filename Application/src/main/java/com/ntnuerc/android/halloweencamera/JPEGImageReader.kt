@@ -8,11 +8,10 @@ import android.os.HandlerThread
 import android.util.Log
 import android.view.Surface
 
-class RGBImageReader(width: Int, height: Int, format: Int = ImageFormat.YUV_420_888, maxImages: Int = 5) {
-    val jni  = JNILink()
+class JPEGImageReader(width: Int, height: Int, format: Int = ImageFormat.JPEG, maxImages: Int = 5) {
 
     private val imageReader: ImageReader
-    private val TAG = "RGBImageReader"
+    private val TAG = "JPEGImageReader"
     private val listener = ImageReader.OnImageAvailableListener {
         val image = it.acquireLatestImage()
         if (image != null ) {
@@ -21,8 +20,8 @@ class RGBImageReader(width: Int, height: Int, format: Int = ImageFormat.YUV_420_
             val planes = image.planes
 
             Log.d(TAG, "Acquired image " + planes.size )
-            val result = processImage( image )
-            Log.d(TAG, "Processed image " + result )
+            processImage( image )
+            Log.d(TAG, "Processed image " )
 
             image.close()
         }
@@ -33,7 +32,7 @@ class RGBImageReader(width: Int, height: Int, format: Int = ImageFormat.YUV_420_
 
     private val lock : Any = Any()
 
-//    private fun makeHandler( looper: Looper): Handler {
+    //    private fun makeHandler( looper: Looper): Handler {
 //        return object:Handler( looper ) {
 //
 //        }
@@ -56,21 +55,20 @@ class RGBImageReader(width: Int, height: Int, format: Int = ImageFormat.YUV_420_
         return imageReader.surface
     }
 
-    fun processImage(src: Image): String {
-        require( src.getFormat() == ImageFormat.YUV_420_888) {
-            "src must have format YUV_420_888."
+    private var videoService : VideoClientRunnerThread? = null
+
+    fun setVideoService( vt : VideoClientRunnerThread ) {
+        videoService = vt
+    }
+
+    fun processImage(src: Image) {
+        require( src.getFormat() == ImageFormat.JPEG) {
+            "src must have format JPEG."
         }
 
-        val planes = src.planes
-        // Spec guarantees that planes[0] is luma and has pixel stride of 1.
-        // It also guarantees that planes[1] and planes[2] have the same row and
-        // pixel stride.
-        require(!(planes[1].pixelStride != 1 && planes[1].pixelStride != 2)) {
-            "src chroma plane must have a pixel stride of 1 or 2: got " + planes[1].pixelStride
+        if ( videoService != null ) {
+            videoService?.write(byteArrayOf(65, 66, 67, 68, 69, 70))
         }
-
-
-        return jni.jbTest( src.width, src.height, planes[0].buffer, planes[1].buffer, planes[2].buffer )
     }
 
 }

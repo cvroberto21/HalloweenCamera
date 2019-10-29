@@ -19,6 +19,7 @@ package com.ntnuerc.android.halloweencamera
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager.PERMISSION_GRANTED
@@ -60,11 +61,11 @@ import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 
-class Camera2VideoFragment : Fragment(), View.OnClickListener,
+class HalloweenCameraFragment : Fragment(), View.OnClickListener,
         ActivityCompat.OnRequestPermissionsResultCallback {
 
     private val FRAGMENT_DIALOG = "dialog"
-    private val TAG = "Camera2VideoFragment"
+    private val TAG = "HalloweenCameraFragment"
     private val SENSOR_ORIENTATION_DEFAULT_DEGREES = 90
     private val SENSOR_ORIENTATION_INVERSE_DEGREES = 270
     private val DEFAULT_ORIENTATIONS = SparseIntArray().apply {
@@ -168,7 +169,7 @@ class Camera2VideoFragment : Fragment(), View.OnClickListener,
 
         override fun onOpened(cameraDevice: CameraDevice) {
             cameraOpenCloseLock.release()
-            this@Camera2VideoFragment.cameraDevice = cameraDevice
+            this@HalloweenCameraFragment.cameraDevice = cameraDevice
             startPreview()
             configureTransform(textureView.width, textureView.height)
             //startBluetooth()
@@ -177,13 +178,13 @@ class Camera2VideoFragment : Fragment(), View.OnClickListener,
         override fun onDisconnected(cameraDevice: CameraDevice) {
             cameraOpenCloseLock.release()
             cameraDevice.close()
-            this@Camera2VideoFragment.cameraDevice = null
+            this@HalloweenCameraFragment.cameraDevice = null
         }
 
         override fun onError(cameraDevice: CameraDevice, error: Int) {
             cameraOpenCloseLock.release()
             cameraDevice.close()
-            this@Camera2VideoFragment.cameraDevice = null
+            this@HalloweenCameraFragment.cameraDevice = null
             activity?.finish()
         }
 
@@ -198,7 +199,7 @@ class Camera2VideoFragment : Fragment(), View.OnClickListener,
                               savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_camera2_video, container, false)
 
-    private var rgbReader: RGBImageReader? = null
+    private var jpegReader: JPEGImageReader? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         textureView = view.findViewById(R.id.texture)
@@ -208,9 +209,47 @@ class Camera2VideoFragment : Fragment(), View.OnClickListener,
         view.findViewById<View>(R.id.menu).setOnClickListener(this)
     }
 
+    private val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
+
+    private var videoService: VideoClientConnectThread? = null
+
+    private fun connectBluetooth( ) {
+        val REQUEST_ENABLE_BT : Int = 1459
+
+        if  ( bluetoothAdapter != null ) {
+            if (bluetoothAdapter.isEnabled == false) {
+                val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
+            }
+
+            val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter.bondedDevices
+
+            var peer : BluetoothDevice? = null
+
+            if ( pairedDevices != null ) {
+                for (device in pairedDevices) {
+                    val deviceName = device.name
+                    //val deviceHardwareAddress = device.address // MAC address
+                    val PEER_NAME = "JB_Canary"
+
+                    if (device.name == PEER_NAME) {
+                        peer = device
+                        break
+                    }
+                }
+            }
+            if (peer != null ) {
+                startBluetoothThread()
+                videoService = VideoClientConnectThread( peer, bluetoothHandler!! )
+            }
+        }
+    }
+
     override fun onResume() {
         super.onResume()
+
         startBackgroundThread()
+        connectBluetooth()
 
         // When the screen is turned off and turned back on, the SurfaceTexture is already
         // available, and "onSurfaceTextureAvailable" will not be called. In that case, we can open
@@ -226,12 +265,15 @@ class Camera2VideoFragment : Fragment(), View.OnClickListener,
     override fun onPause() {
         closeCamera()
         stopBackgroundThread()
+        stopBluetoothThread()
+        videoService?.onPause()
         super.onPause()
     }
 
     override fun onClick(view: View) {
         when (view.id) {
-            R.id.video -> if (isProcessingVideo) stopProcessingVideo() else startProcessingVideo()
+            R.id.video -> if (isProcessingVideo) stopProcessingVideo()
+                          else startProcessingVideo()
             R.id.menu -> {
                 if (activity != null) {
                     AlertDialog.Builder(activity)
@@ -262,10 +304,29 @@ class Camera2VideoFragment : Fragment(), View.OnClickListener,
             backgroundThread = null
             backgroundHandler = null
         } catch (e: InterruptedException) {
-            Log.e(TAG, e.toString())
+            Log.e( TAG, e.toString() )
         }
     }
 
+    private var bluetoothThread : HandlerThread? = null
+    private var bluetoothHandler: Handler? = null
+
+    private fun startBluetoothThread() {
+        bluetoothThread = HandlerThread("Bluetooth")
+        bluetoothThread?.start()
+        bluetoothHandler = Handler( bluetoothThread!!.looper)
+    }
+
+    private fun stopBluetoothThread( ) {
+        bluetoothThread?.quitSafely()
+        try {
+            bluetoothThread?.join()
+            bluetoothThread = null
+            bluetoothHandler = null
+        } catch( e: InterruptedException ) {
+            Log.e( TAG,e.toString() )
+        }
+    }
     /**
      * Gets whether you should show UI with rationale for requesting permissions.
      *
@@ -352,8 +413,6 @@ class Camera2VideoFragment : Fragment(), View.OnClickListener,
             }
             configureTransform(width, height)
 
-            rgbReader = RGBImageReader( 640, 480 )
-
             manager.openCamera(cameraId, stateCallback, null)
         } catch (e: CameraAccessException) {
             showToast("Cannot access the camera.")
@@ -366,6 +425,12 @@ class Camera2VideoFragment : Fragment(), View.OnClickListener,
         } catch (e: InterruptedException) {
             throw RuntimeException("Interrupted while trying to lock camera opening.")
         }
+
+        //rgbReader = RGBImageReader( 640, 480 )
+        jpegReader = JPEGImageReader( 640, 480 )
+        //if (videoService != null ) {
+            //jpegReader?.setVideoService( videoService!!.getRunner()!! )
+        //}
     }
 
     /**
@@ -377,7 +442,8 @@ class Camera2VideoFragment : Fragment(), View.OnClickListener,
             closePreviewSession()
             cameraDevice?.close()
             cameraDevice = null
-            rgbReader = null
+            jpegReader = null
+            //rgbReader = null
         } catch (e: InterruptedException) {
             throw RuntimeException("Interrupted while trying to lock camera closing.", e)
         } finally {
@@ -481,9 +547,10 @@ class Camera2VideoFragment : Fragment(), View.OnClickListener,
                 setDefaultBufferSize(previewSize.width, previewSize.height)
             }
 
+
             // Set up Surface for camera preview and MediaRecorder
             val previewSurface = Surface(texture)
-            val processorSurface = rgbReader!!.getSurface()
+            val processorSurface = jpegReader!!.getSurface()
             val surfaces = ArrayList<Surface>().apply {
                 add(previewSurface)
                 add(processorSurface)
@@ -576,6 +643,6 @@ class Camera2VideoFragment : Fragment(), View.OnClickListener,
     }
 
     companion object {
-        fun newInstance(): Camera2VideoFragment = Camera2VideoFragment()
+        fun newInstance(): HalloweenCameraFragment = HalloweenCameraFragment()
     }
 }

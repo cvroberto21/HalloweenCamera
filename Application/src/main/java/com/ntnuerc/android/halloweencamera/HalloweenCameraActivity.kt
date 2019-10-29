@@ -18,19 +18,14 @@ package com.ntnuerc.android.halloweencamera
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.ntnuerc.android.halloweencamera.bluetooth.BluetoothConnectionService
-import com.ntnuerc.android.halloweencamera.bluetooth.SPPBluetoothEventListener
 
-class CameraActivity : AppCompatActivity() {
-
-    private val bluetoothConnectionService : BluetoothConnectionService =
-            BluetoothConnectionService(this)
+class HalloweenCameraActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_camera)
 
-        val frag = Camera2VideoFragment.newInstance()
+        val frag = HalloweenCameraFragment.newInstance()
         savedInstanceState ?: supportFragmentManager.beginTransaction()
                     .replace(R.id.container, frag)
                     .commit()
