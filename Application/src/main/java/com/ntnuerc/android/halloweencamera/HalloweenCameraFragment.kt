@@ -266,7 +266,8 @@ class HalloweenCameraFragment : Fragment(), View.OnClickListener,
         closeCamera()
         stopBackgroundThread()
         stopBluetoothThread()
-        videoService?.onPause()
+        videoService?.cancel()
+        videoService = null
         super.onPause()
     }
 
@@ -428,9 +429,6 @@ class HalloweenCameraFragment : Fragment(), View.OnClickListener,
 
         //rgbReader = RGBImageReader( 640, 480 )
         jpegReader = JPEGImageReader( 640, 480 )
-        //if (videoService != null ) {
-            //jpegReader?.setVideoService( videoService!!.getRunner()!! )
-        //}
     }
 
     /**
@@ -585,6 +583,12 @@ class HalloweenCameraFragment : Fragment(), View.OnClickListener,
             Log.e(TAG, e.toString())
         }
 
+        if ( ( videoService != null ) && (jpegReader != null) ) {
+            var r = videoService?.getRunner()
+            if ( r != null ) {
+                jpegReader?.setVideoService(r)
+            }
+        }
     }
 
     private fun closePreviewSession() {
