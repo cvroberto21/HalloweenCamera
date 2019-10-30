@@ -19,7 +19,11 @@ class JPEGImageReader(width: Int, height: Int, format: Int = ImageFormat.JPEG, m
             Log.d(TAG, "Image format" + fmt)
             val planes = image.planes
 
-            Log.d(TAG, "Acquired image " + planes.size )
+            Log.d(TAG, "Acquired image height" + image.height + ", width" + image.width + " planes")
+            Log.d(TAG, "Acquired image " + planes[0].pixelStride + "," + planes[0].rowStride + " planes")
+//            Log.d(TAG, "Acquired image " + planes[1].pixelStride + "," + planes[1].rowStride + " planes")
+//            Log.d(TAG, "Acquired image " + planes[2].pixelStride + "," + planes[2].rowStride + " planes")
+
             processImage( image )
             Log.d(TAG, "Processed image " )
 
@@ -62,13 +66,27 @@ class JPEGImageReader(width: Int, height: Int, format: Int = ImageFormat.JPEG, m
     }
 
     fun processImage(src: Image) {
-        require( src.getFormat() == ImageFormat.JPEG) {
-            "src must have format JPEG."
-        }
+//        require( src.getFormat() == ImageFormat.JPEG) {
+//            "src must have format JPEG."
+//        }
 
-        if ( videoService != null ) {
-            videoService?.write(byteArrayOf(65, 66, 67, 68, 69, 70))
+        val jpegData = imageToByteArray( src )
+        Log.d(TAG, "jpeg image size " + jpegData?.size )
+
+        if ( ( videoService != null ) and ( jpegData != null ) ){
+            videoService?.write( jpegData!! )
         }
+    }
+
+    fun imageToByteArray(image: Image): ByteArray? {
+        var data: ByteArray? = null
+        if (image.format == ImageFormat.JPEG) {
+            val planes = image.planes
+            val buffer = planes[0].buffer
+            data = ByteArray(buffer.capacity())
+            buffer.get(data)
+        }
+        return data
     }
 
 }

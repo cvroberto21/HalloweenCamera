@@ -19,13 +19,13 @@ const val MESSAGE_TOAST: Int = 2
 
 class VideoClientRunnerThread {
 
-    private val connectThread : ConnectedThread? = null
+    private var connectThread : ConnectedThread? = null
     private var handler : Handler? = null
 
     fun connect( socket : BluetoothSocket, handler : Handler ) {
-        val connectThread = ConnectedThread( socket, handler )
+        connectThread = ConnectedThread( socket, handler )
         this.handler = handler
-        connectThread.start()
+        connectThread?.start()
     }
 
     fun disconnect( ) {

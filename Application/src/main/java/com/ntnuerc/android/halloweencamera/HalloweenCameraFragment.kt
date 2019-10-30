@@ -214,7 +214,7 @@ class HalloweenCameraFragment : Fragment(), View.OnClickListener,
     private var videoService: VideoClientConnectThread? = null
 
     private fun connectBluetooth( ) {
-        val REQUEST_ENABLE_BT : Int = 1459
+        val REQUEST_ENABLE_BT = 1459
 
         if  ( bluetoothAdapter != null ) {
             if (bluetoothAdapter.isEnabled == false) {
@@ -230,7 +230,8 @@ class HalloweenCameraFragment : Fragment(), View.OnClickListener,
                 for (device in pairedDevices) {
                     val deviceName = device.name
                     //val deviceHardwareAddress = device.address // MAC address
-                    val PEER_NAME = "JB_Canary"
+                    //val PEER_NAME = "JB_Canary"
+                    val PEER_NAME = "JB_Flash"
 
                     if (device.name == PEER_NAME) {
                         peer = device
@@ -428,7 +429,7 @@ class HalloweenCameraFragment : Fragment(), View.OnClickListener,
         }
 
         //rgbReader = RGBImageReader( 640, 480 )
-        jpegReader = JPEGImageReader( 640, 480 )
+        jpegReader = JPEGImageReader( previewSize.width, previewSize.height )
     }
 
     /**
@@ -583,10 +584,22 @@ class HalloweenCameraFragment : Fragment(), View.OnClickListener,
             Log.e(TAG, e.toString())
         }
 
+        Log.d(TAG,"Trying to set jpegReader")
         if ( ( videoService != null ) && (jpegReader != null) ) {
-            var r = videoService?.getRunner()
+            val r = videoService?.getRunner()
             if ( r != null ) {
                 jpegReader?.setVideoService(r)
+                Log.d(TAG,"Trying to set jpegReader success")
+            } else {
+                Log.d(TAG,"Trying to set jpegReader failed. r==null")
+            }
+        } else {
+            Log.d(TAG,"Trying to set jpegReader failed, videoService or jpegReader is null")
+            if ( videoService == null ) {
+                Log.d(TAG, "Trying to set jpegReader failed, videoService is null")
+            }
+            if ( jpegReader == null ) {
+                Log.d(TAG, "Trying to set jpegReader failed, jpegReader is null")
             }
         }
     }
