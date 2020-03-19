@@ -8,7 +8,7 @@ import android.util.Log
 import java.io.IOException
 import java.util.*
 
-class VideoClientConnectThread( device: BluetoothDevice, private val handler: Handler ) {
+class VideoClientConnectThread(device: BluetoothDevice, private val handler: Handler ) {
     private val TAG = "JBVidCon"
     private val SPP_UUID = "00001101-0000-1000-8000-00805f9b34fb"
 
