@@ -48,10 +48,8 @@ class JPEGImageReader(width: Int, height: Int, format: Int = ImageFormat.JPEG, m
         thread.start()
         val handler = Handler(thread.looper)
 
-
         backgroundHandler = handler
         backgroundThread = thread
-
         imageReader.setOnImageAvailableListener( listener, backgroundHandler )
     }
 
@@ -66,9 +64,9 @@ class JPEGImageReader(width: Int, height: Int, format: Int = ImageFormat.JPEG, m
     }
 
     fun processImage(src: Image) {
-//        require( src.getFormat() == ImageFormat.JPEG) {
-//            "src must have format JPEG."
-//        }
+        require( src.getFormat() == ImageFormat.JPEG) {
+            "src must have format JPEG."
+        }
 
         val jpegData = imageToByteArray( src )
         Log.d(TAG, "jpeg image size " + jpegData?.size )

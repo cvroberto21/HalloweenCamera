@@ -10,5 +10,5 @@ class JNILink {
         System.loadLibrary( "jbImageProcessing" )
     }
 
-    external fun jbTest(srcWidth: Int, srcHeight: Int, srcBufY: ByteBuffer, srcBufU: ByteBuffer, srcBufV: ByteBuffer ): String
+    external fun jbProcessImage(srcWidth: Int, srcHeight: Int, srcBufY: ByteBuffer, srcBufU: ByteBuffer, srcBufV: ByteBuffer ): String
 }

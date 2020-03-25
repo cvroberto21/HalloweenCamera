@@ -8,19 +8,29 @@
 
 #include "jbImageProcessing.h"
 #include <string>
+#include <cinttypes>
+#include <memory>
 
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, "JBImageProcessing", __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, "JBImageProcessing", __VA_ARGS__)
 
 extern "C" {
-
     JNIEXPORT jstring
-    JNICALL Java_com_ntnuerc_android_halloweencamera_JNILink_jbTest(
+    JNICALL Java_com_ntnuerc_android_halloweencamera_JNILink_jbProcessImage(
             JNIEnv *pEnv, jobject pThis, jint srcWidth, jint srcHeight,
             jobject srcPlaneY, jobject srcPlaneU, jobject srcPlaneV) {
 
-        LOGD("Running cpp code");
+        uint8_t * buf = reinterpret_cast<uint8_t *>( pEnv->GetDirectBufferAddress( srcPlaneY ) );
+        LOGD("Running cpp code %dx%d", srcWidth, srcHeight );
 
-        return pEnv->NewStringUTF("Ok");
+        for (int y = 0; y < srcHeight; y++ ) {
+            for ( int x = 0; x < srcWidth; x++ ) {
+                if ( buf[y * srcWidth + x] < 0 ) {
+                    buf[y * srcWidth + x] = 0;
+                }
+            }
+        }
+
+        return pEnv->NewStringUTF("Ok RGB scrambled");
     }
 }

@@ -64,6 +64,8 @@ import kotlin.collections.ArrayList
 class HalloweenCameraFragment : Fragment(), View.OnClickListener,
         ActivityCompat.OnRequestPermissionsResultCallback {
 
+    private var reader: RGBImageReader? = null
+
     private val FRAGMENT_DIALOG = "dialog"
     private val TAG = "HalloweenCameraFragment"
     private val SENSOR_ORIENTATION_DEFAULT_DEGREES = 90
@@ -199,8 +201,6 @@ class HalloweenCameraFragment : Fragment(), View.OnClickListener,
                               savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_camera2_video, container, false)
 
-    private var jpegReader: JPEGImageReader? = null
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         textureView = view.findViewById(R.id.texture)
         videoButton = view.findViewById<Button>(R.id.video).also {
@@ -228,7 +228,7 @@ class HalloweenCameraFragment : Fragment(), View.OnClickListener,
 
             if ( pairedDevices != null ) {
                 for (device in pairedDevices) {
-                    val deviceName = device.name
+                    //val deviceName = device.name
                     //val deviceHardwareAddress = device.address // MAC address
                     //val PEER_NAME = "JB_Canary"
                     val PEER_NAME = "JB_Flash"
@@ -404,9 +404,9 @@ class HalloweenCameraFragment : Fragment(), View.OnClickListener,
             val map = characteristics.get(SCALER_STREAM_CONFIGURATION_MAP) ?:
                     throw RuntimeException("Cannot get available preview/video sizes")
             sensorOrientation = characteristics.get(SENSOR_ORIENTATION) as Int
-            videoSize = Size(640, 480)
+            videoSize = Size(320, 240 )
             previewSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture::class.java),
-                    width, height, videoSize)
+                    320, 240, videoSize)
 
             if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 textureView.setAspectRatio(previewSize.width, previewSize.height)
@@ -428,8 +428,8 @@ class HalloweenCameraFragment : Fragment(), View.OnClickListener,
             throw RuntimeException("Interrupted while trying to lock camera opening.")
         }
 
-        //rgbReader = RGBImageReader( 640, 480 )
-        jpegReader = JPEGImageReader( previewSize.width, previewSize.height )
+        //reader = JPEGImageReader( previewSize.width, previewSize.height )
+        reader = RGBImageReader( previewSize.width, previewSize.height )
     }
 
     /**
@@ -441,7 +441,7 @@ class HalloweenCameraFragment : Fragment(), View.OnClickListener,
             closePreviewSession()
             cameraDevice?.close()
             cameraDevice = null
-            jpegReader = null
+            reader = null
             //rgbReader = null
         } catch (e: InterruptedException) {
             throw RuntimeException("Interrupted while trying to lock camera closing.", e)
@@ -549,7 +549,7 @@ class HalloweenCameraFragment : Fragment(), View.OnClickListener,
 
             // Set up Surface for camera preview and MediaRecorder
             val previewSurface = Surface(texture)
-            val processorSurface = jpegReader!!.getSurface()
+            val processorSurface = reader!!.getSurface()
             val surfaces = ArrayList<Surface>().apply {
                 add(previewSurface)
                 add(processorSurface)
@@ -584,22 +584,22 @@ class HalloweenCameraFragment : Fragment(), View.OnClickListener,
             Log.e(TAG, e.toString())
         }
 
-        Log.d(TAG,"Trying to set jpegReader")
-        if ( ( videoService != null ) && (jpegReader != null) ) {
+        Log.d(TAG,"Trying to set reader")
+        if ( ( videoService != null ) && (reader != null) ) {
             val r = videoService?.getRunner()
             if ( r != null ) {
-                jpegReader?.setVideoService(r)
-                Log.d(TAG,"Trying to set jpegReader success")
+                reader?.setVideoService(r)
+                Log.d(TAG,"Trying to set reader success")
             } else {
-                Log.d(TAG,"Trying to set jpegReader failed. r==null")
+                Log.d(TAG,"Trying to set reader failed. r==null")
             }
         } else {
-            Log.d(TAG,"Trying to set jpegReader failed, videoService or jpegReader is null")
+            Log.d(TAG,"Trying to set reader failed, videoService or reader is null")
             if ( videoService == null ) {
-                Log.d(TAG, "Trying to set jpegReader failed, videoService is null")
+                Log.d(TAG, "Trying to set reader failed, videoService is null")
             }
-            if ( jpegReader == null ) {
-                Log.d(TAG, "Trying to set jpegReader failed, jpegReader is null")
+            if ( reader == null ) {
+                Log.d(TAG, "Trying to set reader failed, reader is null")
             }
         }
     }

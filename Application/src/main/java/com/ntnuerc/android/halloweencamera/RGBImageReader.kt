@@ -69,8 +69,12 @@ class RGBImageReader(width: Int, height: Int, format: Int = ImageFormat.YUV_420_
             "src chroma plane must have a pixel stride of 1 or 2: got " + planes[1].pixelStride
         }
 
-
-        return jni.jbTest( src.width, src.height, planes[0].buffer, planes[1].buffer, planes[2].buffer )
+        return jni.jbProcessImage( src.width, src.height, planes[0].buffer, planes[1].buffer, planes[2].buffer )
     }
 
+    private var videoService : VideoClientRunnerThread? = null
+
+    fun setVideoService( vt : VideoClientRunnerThread ) {
+        videoService = vt
+    }
 }
