@@ -48,7 +48,6 @@ import android.view.Surface
 import android.view.TextureView
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import androidx.core.app.ActivityCompat
@@ -60,6 +59,7 @@ import java.util.Collections
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
+import kotlinx.android.synthetic.main.fragment_camera2_video.*
 
 class HalloweenCameraFragment : Fragment(), View.OnClickListener,
         ActivityCompat.OnRequestPermissionsResultCallback {
@@ -102,16 +102,6 @@ class HalloweenCameraFragment : Fragment(), View.OnClickListener,
         override fun onSurfaceTextureUpdated(surfaceTexture: SurfaceTexture) = Unit
 
     }
-
-    /**
-     * An [AutoFitTextureView] for camera preview.
-     */
-    private lateinit var textureView: AutoFitTextureView
-
-    /**
-     * Button to record video
-     */
-    private lateinit var videoButton: Button
 
     /**
      * A reference to the opened [android.hardware.camera2.CameraDevice].
@@ -189,7 +179,6 @@ class HalloweenCameraFragment : Fragment(), View.OnClickListener,
             this@HalloweenCameraFragment.cameraDevice = null
             activity?.finish()
         }
-
     }
 
     /**
@@ -202,11 +191,9 @@ class HalloweenCameraFragment : Fragment(), View.OnClickListener,
     ): View? = inflater.inflate(R.layout.fragment_camera2_video, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        textureView = view.findViewById(R.id.texture)
-        videoButton = view.findViewById<Button>(R.id.video).also {
-            it.setOnClickListener(this)
-        }
-        view.findViewById<View>(R.id.menu).setOnClickListener(this)
+        videoButton.setOnClickListener(this)
+        menu.setOnClickListener(this)
+        logView.text = "Activity/fragment started"
     }
 
     private val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
@@ -231,8 +218,8 @@ class HalloweenCameraFragment : Fragment(), View.OnClickListener,
                     //val deviceName = device.name
                     //val deviceHardwareAddress = device.address // MAC address
                     //val PEER_NAME = "JB_Canary"
-                    val PEER_NAME = "JB_Flash"
-
+                    //val PEER_NAME = "JB_Flash"
+                    val PEER_NAME = "JB_Hawk"
                     if (device.name == PEER_NAME) {
                         peer = device
                         break
@@ -241,7 +228,7 @@ class HalloweenCameraFragment : Fragment(), View.OnClickListener,
             }
             if (peer != null ) {
                 startBluetoothThread()
-                videoService = VideoClientConnectThread( peer, bluetoothHandler!! )
+                videoService = VideoClientConnectThread( peer, bluetoothHandler!!, logView )
             }
         }
     }
@@ -274,7 +261,7 @@ class HalloweenCameraFragment : Fragment(), View.OnClickListener,
 
     override fun onClick(view: View) {
         when (view.id) {
-            R.id.video -> if (isProcessingVideo) stopProcessingVideo()
+            R.id.videoButton -> if (isProcessingVideo) stopProcessingVideo()
                           else startProcessingVideo()
             R.id.menu -> {
                 if (activity != null) {

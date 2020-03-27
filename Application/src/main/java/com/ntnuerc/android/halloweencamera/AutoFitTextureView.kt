@@ -19,7 +19,6 @@ package com.ntnuerc.android.halloweencamera
 import android.content.Context
 import android.util.AttributeSet
 import android.view.TextureView
-import android.view.View
 
 /**
  * A [TextureView] that can be adjusted to a specified aspect ratio.

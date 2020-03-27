@@ -18,6 +18,8 @@ package com.ntnuerc.android.halloweencamera
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import kotlinx.android.synthetic.main.fragment_camera2_video.*
+
 
 class HalloweenCameraActivity : AppCompatActivity() {
 
@@ -30,5 +32,4 @@ class HalloweenCameraActivity : AppCompatActivity() {
                     .replace(R.id.container, frag)
                     .commit()
     }
-
 }

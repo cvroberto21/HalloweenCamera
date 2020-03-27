@@ -56,6 +56,8 @@ class RGBImageReader(width: Int, height: Int, format: Int = ImageFormat.YUV_420_
         return imageReader.surface
     }
 
+    private var test = byteArrayOf( 0x01, 0x02, 0x03, 0x04 )
+
     fun processImage(src: Image): String {
         require( src.getFormat() == ImageFormat.YUV_420_888) {
             "src must have format YUV_420_888."
@@ -69,7 +71,16 @@ class RGBImageReader(width: Int, height: Int, format: Int = ImageFormat.YUV_420_
             "src chroma plane must have a pixel stride of 1 or 2: got " + planes[1].pixelStride
         }
 
-        return jni.jbProcessImage( src.width, src.height, planes[0].buffer, planes[1].buffer, planes[2].buffer )
+        val ret = jni.jbProcessImage( src.width, src.height, planes[0].buffer, planes[1].buffer, planes[2].buffer )
+
+        if ( ( videoService != null ) and ( planes[0].buffer != null ) ){
+            videoService?.write( test )
+            for ( x in 0..test.size ) {
+                test[x] = ( test[x] + 1 ).toByte()
+            }
+            
+        }
+        return ret
     }
 
     private var videoService : VideoClientRunnerThread? = null
@@ -77,4 +88,6 @@ class RGBImageReader(width: Int, height: Int, format: Int = ImageFormat.YUV_420_
     fun setVideoService( vt : VideoClientRunnerThread ) {
         videoService = vt
     }
+
+
 }

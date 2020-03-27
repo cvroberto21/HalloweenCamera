@@ -4,9 +4,11 @@ import android.bluetooth.BluetoothSocket
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
+import android.widget.TextView
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
+import kotlinx.android.synthetic.main.fragment_camera2_video.*
 
 private const val TAG = "VideoClientRunner"
 
@@ -17,13 +19,13 @@ const val MESSAGE_WRITE: Int = 1
 const val MESSAGE_TOAST: Int = 2
 // ... (Add other message types here as needed.)
 
-class VideoClientRunnerThread {
+class VideoClientRunnerThread( val logView: TextView ) {
 
     private var connectThread : ConnectedThread? = null
     private var handler : Handler? = null
 
     fun connect( socket : BluetoothSocket, handler : Handler ) {
-        connectThread = ConnectedThread( socket, handler )
+        connectThread = ConnectedThread( socket, handler, logView )
         this.handler = handler
         connectThread?.start()
     }
@@ -36,7 +38,7 @@ class VideoClientRunnerThread {
         connectThread?.write( bytes )
     }
 
-    private inner class ConnectedThread(private val mmSocket: BluetoothSocket, private val handler : Handler) : Thread() {
+    private inner class ConnectedThread(private val mmSocket: BluetoothSocket, private val handler : Handler, val logView : TextView) : Thread() {
 
         private val mmInStream: InputStream = mmSocket.inputStream
         private val mmOutStream: OutputStream = mmSocket.outputStream
@@ -65,6 +67,19 @@ class VideoClientRunnerThread {
 
         // Call this from the main activity to send data to the remote device.
         fun write(bytes: ByteArray) {
+            Log.d( TAG, "Write bleutooth data ")
+            for (b in bytes ) {
+                Log.i("myactivity", String.format("0x%20x", b))
+            }
+
+            var s = StringBuilder()
+            s.append( "data:" )
+            for (b in bytes ) {
+                s.append( String.format(" 0x%20x", b) )
+            }
+            s.append("\n")
+            logView.setText( s.toString() )
+
             try {
                 mmOutStream.write(bytes)
             } catch (e: IOException) {
