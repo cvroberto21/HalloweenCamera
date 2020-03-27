@@ -10,7 +10,8 @@ import java.util.*
 
 class VideoClientConnectThread(device: BluetoothDevice, private val handler: Handler ) {
     private val TAG = "JBVidCon"
-    private val SPP_UUID = "00001101-0000-1000-8000-00805f9b34fb"
+    //private val SPP_UUID = "00001101-0000-1000-8000-00805f9b34fb"
+    private val VIDEO_SERVER_UUID = "00001101-0000-1000-8000-00805f9b34ff"
 
     val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
     private var connectThread : ConnectThread? = null
@@ -32,7 +33,7 @@ class VideoClientConnectThread(device: BluetoothDevice, private val handler: Han
     private inner class ConnectThread(private val device: BluetoothDevice, var handler : Handler) : Thread() {
 
         private val mmSocket: BluetoothSocket? by lazy(LazyThreadSafetyMode.NONE) {
-            device.createRfcommSocketToServiceRecord( UUID.fromString(SPP_UUID) )
+            device.createRfcommSocketToServiceRecord( UUID.fromString(VIDEO_SERVER_UUID) )
         }
 
 
