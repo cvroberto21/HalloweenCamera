@@ -1,6 +1,8 @@
 package com.ntnuerc.android.halloweencamera
 
+import android.app.Activity
 import android.bluetooth.BluetoothSocket
+import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
@@ -19,13 +21,13 @@ const val MESSAGE_WRITE: Int = 1
 const val MESSAGE_TOAST: Int = 2
 // ... (Add other message types here as needed.)
 
-class VideoClientRunnerThread( val logView: TextView ) {
+class VideoClientRunnerThread(private val context: Context, private val logView: TextView ) {
 
     private var connectThread : ConnectedThread? = null
     private var handler : Handler? = null
 
     fun connect( socket : BluetoothSocket, handler : Handler ) {
-        connectThread = ConnectedThread( socket, handler, logView )
+        connectThread = ConnectedThread( context, socket, handler, logView )
         this.handler = handler
         connectThread?.start()
     }
@@ -38,13 +40,21 @@ class VideoClientRunnerThread( val logView: TextView ) {
         connectThread?.write( bytes )
     }
 
-    private inner class ConnectedThread(private val mmSocket: BluetoothSocket, private val handler : Handler, val logView : TextView) : Thread() {
+    private inner class ConnectedThread( private val context: Context,
+                                         private val mmSocket: BluetoothSocket,
+                                         private val handler : Handler,
+                                         private val logView : TextView) : Thread() {
 
         private val mmInStream: InputStream = mmSocket.inputStream
         private val mmOutStream: OutputStream = mmSocket.outputStream
         private val mmBuffer: ByteArray = ByteArray(1024) // mmBuffer store for the stream
 
         override fun run() {
+            val act: Activity = context as Activity
+            act.runOnUiThread(Runnable {
+                logView.append( "Connected *** thread started\n" )
+            })
+
             var numBytes: Int // bytes returned from read()
 
             // Keep listening to the InputStream until an exception occurs.
@@ -58,10 +68,10 @@ class VideoClientRunnerThread( val logView: TextView ) {
                 }
 
                 // Send the obtained bytes to the UI activity.
-                val readMsg = handler.obtainMessage(
-                        MESSAGE_READ, numBytes, -1,
-                        mmBuffer)
-                readMsg.sendToTarget()
+//                val readMsg = handler.obtainMessage(
+//                        MESSAGE_READ, numBytes, -1,
+//                        mmBuffer)
+//                readMsg.sendToTarget()
             }
         }
 
@@ -78,7 +88,11 @@ class VideoClientRunnerThread( val logView: TextView ) {
                 s.append( String.format(" 0x%20x", b) )
             }
             s.append("\n")
-            logView.setText( s.toString() )
+            val act: Activity = context as Activity
+            act.runOnUiThread(Runnable {
+                logView.append( "Connected thread write data\n" )
+                logView.setText( s.toString() )
+            })
 
             try {
                 mmOutStream.write(bytes)

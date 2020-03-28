@@ -228,7 +228,7 @@ class HalloweenCameraFragment : Fragment(), View.OnClickListener,
             }
             if (peer != null ) {
                 startBluetoothThread()
-                videoService = VideoClientConnectThread( peer, bluetoothHandler!!, logView )
+                videoService = VideoClientConnectThread( context!!, peer, bluetoothHandler!!, logView )
             }
         }
     }
