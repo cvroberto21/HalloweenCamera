@@ -9,7 +9,7 @@ import android.util.Log
 import android.view.Surface
 
 //class RGBImageReader(width: Int, height: Int, format: Int = ImageFormat.YUV_420_888, maxImages: Int = 5) {
-class RGBImageReader(width: Int, height: Int, format: Int = ImageFormat.RGB_565, maxImages: Int = 5) {
+class RGBImageReader(width: Int, height: Int, format: Int = ImageFormat.YUV_420_888, maxImages: Int = 5) {
     val jni  = JNILink()
 
     private val imageReader: ImageReader
@@ -40,6 +40,7 @@ class RGBImageReader(width: Int, height: Int, format: Int = ImageFormat.RGB_565,
 //        }
 //    }
     init {
+        Log.d(TAG, "Creating image reader of format $format")
         imageReader = ImageReader.newInstance(width, height, format, maxImages)
 
         val thread = HandlerThread("RGBImageReader")
@@ -60,11 +61,8 @@ class RGBImageReader(width: Int, height: Int, format: Int = ImageFormat.RGB_565,
     private var test = byteArrayOf( 0x01, 0x02, 0x03, 0x04 )
 
     fun processImage(src: Image): String {
-//        require( src.getFormat() == ImageFormat.YUV_420_888) {
-//            "src must have format YUV_420_888."
-//        }
-        require( src.getFormat() == ImageFormat.RGB_565 ) {
-            "src must have format RGB_565."
+        require( src.getFormat() == ImageFormat.YUV_420_888) {
+            "src must have format YUV_420_888."
         }
 
         val planes = src.planes

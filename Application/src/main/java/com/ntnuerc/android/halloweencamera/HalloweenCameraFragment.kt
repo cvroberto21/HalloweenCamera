@@ -24,6 +24,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.content.res.Configuration
+import android.graphics.ImageFormat
 import android.graphics.Matrix
 import android.graphics.RectF
 import android.graphics.SurfaceTexture
@@ -416,7 +417,7 @@ class HalloweenCameraFragment : Fragment(), View.OnClickListener,
         }
 
         //reader = JPEGImageReader( previewSize.width, previewSize.height )
-        reader = RGBImageReader( previewSize.width, previewSize.height )
+        reader = RGBImageReader( previewSize.width, previewSize.height, ImageFormat.YUV_420_888 )
     }
 
     /**
