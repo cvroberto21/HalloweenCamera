@@ -12,32 +12,33 @@ import java.io.InputStream
 import java.io.OutputStream
 import kotlinx.android.synthetic.main.fragment_camera2_video.*
 
-private const val TAG = "VideoClientRunner"
+class VideoClientRunnerThread( val logView: TextView ) {
 
-// Defines several constants used when transmitting messages between the
-// service and the UI.
-const val MESSAGE_READ: Int = 0
-const val MESSAGE_WRITE: Int = 1
-const val MESSAGE_TOAST: Int = 2
+    companion object {
+        private const val TAG = "VideoClientRunner"
+        // Defines several constants used when transmitting messages between the
+        // service and the UI.
+        const val MESSAGE_READ: Int = 0
+        const val MESSAGE_WRITE: Int = 1
+        const val MESSAGE_TOAST: Int = 2
 // ... (Add other message types here as needed.)
+    }
 
-class VideoClientRunnerThread(private val context: Context, private val logView: TextView ) {
-
-    private var connectThread : ConnectedThread? = null
-    private var handler : Handler? = null
+    lateinit private var connectThread : ConnectedThread
+    lateinit private var handler : Handler
 
     fun connect( socket : BluetoothSocket, handler : Handler ) {
         connectThread = ConnectedThread( context, socket, handler, logView )
         this.handler = handler
-        connectThread?.start()
+        connectThread.start()
     }
 
     fun disconnect( ) {
-        connectThread?.cancel()
+        connectThread.cancel()
     }
 
     fun write(bytes: ByteArray) {
-        connectThread?.write( bytes )
+        connectThread.write( bytes )
     }
 
     private inner class ConnectedThread( private val context: Context,

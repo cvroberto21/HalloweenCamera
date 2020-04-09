@@ -84,7 +84,7 @@ class RGBImageReader(width: Int, height: Int, format: Int = ImageFormat.YUV_420_
         return ret
     }
 
-    private var videoService : VideoClientRunnerThread? = null
+    lateinit private var videoService : VideoClientRunnerThread
 
     fun setVideoService( vt : VideoClientRunnerThread ) {
         videoService = vt

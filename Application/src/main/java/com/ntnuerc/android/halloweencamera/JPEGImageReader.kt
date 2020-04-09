@@ -57,7 +57,7 @@ class JPEGImageReader(width: Int, height: Int, format: Int = ImageFormat.JPEG, m
         return imageReader.surface
     }
 
-    private var videoService : VideoClientRunnerThread? = null
+    lateinit private var videoService : VideoClientRunnerThread
 
     fun setVideoService( vt : VideoClientRunnerThread ) {
         videoService = vt
@@ -71,7 +71,7 @@ class JPEGImageReader(width: Int, height: Int, format: Int = ImageFormat.JPEG, m
         val jpegData = imageToByteArray( src )
         Log.d(TAG, "jpeg image size " + jpegData?.size )
 
-        if ( ( videoService != null ) and ( jpegData != null ) ){
+        if ( jpegData != null ) {
             videoService?.write( jpegData!! )
         }
     }

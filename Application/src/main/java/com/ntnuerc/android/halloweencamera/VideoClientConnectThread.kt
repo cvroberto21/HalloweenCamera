@@ -17,14 +17,14 @@ class VideoClientConnectThread(private val context: Context, private val device:
     private val VIDEO_SERVER_UUID = "00001101-0000-1000-8000-00805f9b34ff"
 
     val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
-    private var connectThread : ConnectThread? = null
+    lateinit private var connectThread : ConnectThread
 
     init {
         connectThread = ConnectThread(context, device, handler, logView )
         connectThread?.start()
     }
 
-    public var videoClientRunnerThread : VideoClientRunnerThread? = null
+    lateinit public var videoClientRunnerThread : VideoClientRunnerThread
 
     fun getRunner() : VideoClientRunnerThread? {
         return videoClientRunnerThread
@@ -82,8 +82,7 @@ class VideoClientConnectThread(private val context: Context, private val device:
 
         // Closes the client socket and causes the thread to finish.
         fun cancel() {
-            videoClientRunnerThread?.disconnect()
-            videoClientRunnerThread = null
+            videoClientRunnerThread.disconnect()
             try {
                 mmSocket?.close()
             } catch (e: IOException) {
