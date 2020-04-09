@@ -72,7 +72,7 @@ class JPEGImageReader(width: Int, height: Int, format: Int = ImageFormat.JPEG, m
         Log.d(TAG, "jpeg image size " + jpegData?.size )
 
         if ( jpegData != null ) {
-            videoService?.write( jpegData!! )
+            videoService.write( jpegData )
         }
     }
 

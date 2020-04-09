@@ -75,8 +75,8 @@ class RGBImageReader(width: Int, height: Int, format: Int = ImageFormat.YUV_420_
 
         val ret = jni.jbProcessImage( src.width, src.height, planes[0].buffer, planes[1].buffer, planes[2].buffer )
 
-        if ( ( videoService != null ) and ( planes[0].buffer != null ) ){
-            videoService?.write( test )
+        if (  planes[0].buffer != null ){
+            videoService.write( test )
             for ( x in 0..test.size-1 ) {
                 test[x] = ( test[x] + 1 ).toByte()
             }

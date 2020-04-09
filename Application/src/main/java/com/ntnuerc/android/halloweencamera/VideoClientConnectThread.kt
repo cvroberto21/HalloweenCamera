@@ -17,11 +17,11 @@ class VideoClientConnectThread(private val context: Context, private val device:
     private val VIDEO_SERVER_UUID = "00001101-0000-1000-8000-00805f9b34ff"
 
     val bluetoothAdapter: BluetoothAdapter? = BluetoothAdapter.getDefaultAdapter()
-    lateinit private var connectThread : ConnectThread
+    private var connectThread : ConnectThread
 
     init {
         connectThread = ConnectThread(context, device, handler, logView )
-        connectThread?.start()
+        connectThread.start()
     }
 
     lateinit public var videoClientRunnerThread : VideoClientRunnerThread
@@ -31,7 +31,7 @@ class VideoClientConnectThread(private val context: Context, private val device:
     }
 
     fun cancel() {
-        connectThread?.cancel()
+        connectThread.cancel()
     }
     private inner class ConnectThread( private val context: Context, private val device: BluetoothDevice, private val handler: Handler, private val logView: TextView) : Thread() {
 
@@ -65,7 +65,6 @@ class VideoClientConnectThread(private val context: Context, private val device:
 
                 Log.d(TAG, "Connection success $success")
 
-                val act: Activity = context as Activity
                 act.runOnUiThread(Runnable {
                     logView.append( "Connection success $success\n" )
                 })
@@ -75,7 +74,7 @@ class VideoClientConnectThread(private val context: Context, private val device:
 
                     // The connection attempt succeeded. Perform work associated with
                     // the connection in a separate thread.
-                    videoClientRunnerThread?.connect(socket, handler)
+                    videoClientRunnerThread.connect(socket, handler)
                 }
             }
         }

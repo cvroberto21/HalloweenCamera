@@ -12,7 +12,7 @@ import java.io.InputStream
 import java.io.OutputStream
 import kotlinx.android.synthetic.main.fragment_camera2_video.*
 
-class VideoClientRunnerThread( val logView: TextView ) {
+class VideoClientRunnerThread( val context: Context, val logView: TextView ) {
 
     companion object {
         private const val TAG = "VideoClientRunner"
