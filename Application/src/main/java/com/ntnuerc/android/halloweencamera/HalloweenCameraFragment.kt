@@ -61,6 +61,7 @@ import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 import kotlinx.android.synthetic.main.fragment_camera2_video.*
+import kotlin.math.max
 
 class HalloweenCameraFragment : Fragment(), View.OnClickListener,
         ActivityCompat.OnRequestPermissionsResultCallback {
@@ -205,7 +206,7 @@ class HalloweenCameraFragment : Fragment(), View.OnClickListener,
         val REQUEST_ENABLE_BT = 1459
 
         if  ( bluetoothAdapter != null ) {
-            if (bluetoothAdapter.isEnabled == false) {
+            if (! bluetoothAdapter.isEnabled ) {
                 val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
                 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
             }
@@ -392,9 +393,9 @@ class HalloweenCameraFragment : Fragment(), View.OnClickListener,
             val map = characteristics.get(SCALER_STREAM_CONFIGURATION_MAP) ?:
                     throw RuntimeException("Cannot get available preview/video sizes")
             sensorOrientation = characteristics.get(SENSOR_ORIENTATION) as Int
-            videoSize = Size(320, 240 )
+            videoSize = Size(640, 480 )
             previewSize = chooseOptimalSize(map.getOutputSizes(SurfaceTexture::class.java),
-                    320, 240, videoSize)
+                    640, 480, videoSize)
 
             if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 textureView.setAspectRatio(previewSize.width, previewSize.height)
@@ -512,7 +513,7 @@ class HalloweenCameraFragment : Fragment(), View.OnClickListener,
         if (Surface.ROTATION_90 == rotation || Surface.ROTATION_270 == rotation) {
             bufferRect.offset(centerX - bufferRect.centerX(), centerY - bufferRect.centerY())
             matrix.setRectToRect(viewRect, bufferRect, Matrix.ScaleToFit.FILL)
-            val scale = Math.max(
+            val scale = max(
                     viewHeight.toFloat() / previewSize.height,
                     viewWidth.toFloat() / previewSize.width)
             with(matrix) {

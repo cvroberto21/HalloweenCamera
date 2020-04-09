@@ -47,7 +47,6 @@ class RGBImageReader(width: Int, height: Int, format: Int = ImageFormat.YUV_420_
         thread.start()
         val handler = Handler(thread.looper)
 
-
         backgroundHandler = handler
         backgroundThread = thread
 
@@ -57,8 +56,6 @@ class RGBImageReader(width: Int, height: Int, format: Int = ImageFormat.YUV_420_
     fun getSurface(): Surface {
         return imageReader.surface
     }
-
-    private var test = byteArrayOf( 0x01, 0x02, 0x03, 0x04 )
 
     fun processImage(src: Image): String {
         require( src.getFormat() == ImageFormat.YUV_420_888) {
@@ -76,10 +73,10 @@ class RGBImageReader(width: Int, height: Int, format: Int = ImageFormat.YUV_420_
         val ret = jni.jbProcessImage( src.width, src.height, planes[0].buffer, planes[1].buffer, planes[2].buffer )
 
         if (  planes[0].buffer != null ){
-            videoService.write( test )
-            for ( x in 0..test.size-1 ) {
-                test[x] = ( test[x] + 1 ).toByte()
-            }
+//            videoService.write( rcvdPixmap )
+//            for ( x in 0..test.size-1 ) {
+//                test[x] = ( test[x] + 1 ).toByte()
+//            }
         }
         return ret
     }
