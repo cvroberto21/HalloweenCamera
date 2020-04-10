@@ -74,7 +74,7 @@ class VideoClientRunnerThread( val context: Context, val logView: TextView ) {
         }
 
         // Call this from the main activity to send data to the remote device.
-        fun write(bytes: ByteArray) {
+        fun write( bytes: ByteArray ) {
             Log.d( TAG, "Write bleutooth data ")
             for (b in bytes ) {
                 Log.i("myactivity", String.format("0x%20x", b))
@@ -82,7 +82,7 @@ class VideoClientRunnerThread( val context: Context, val logView: TextView ) {
 
             var s = StringBuilder()
             s.append( "data:" )
-            for (b in bytes ) {
+            for (b in bytes.slice(0 ..8 ) ) {
                 s.append( String.format(" 0x%20x", b) )
             }
             s.append("\n")

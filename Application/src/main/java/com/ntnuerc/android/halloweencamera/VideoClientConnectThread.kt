@@ -24,16 +24,15 @@ class VideoClientConnectThread(private val context: Context, private val device:
         connectThread.start()
     }
 
-    lateinit public var videoClientRunnerThread : VideoClientRunnerThread
-
-    fun getRunner() : VideoClientRunnerThread? {
-        return videoClientRunnerThread
-    }
+    var videoClientRunnerThread : VideoClientRunnerThread? = null
 
     fun cancel() {
         connectThread.cancel()
     }
-    private inner class ConnectThread( private val context: Context, private val device: BluetoothDevice, private val handler: Handler, private val logView: TextView) : Thread() {
+    private inner class ConnectThread( private val context: Context,
+                                       private val device: BluetoothDevice,
+                                       private val handler: Handler,
+                                       private val logView: TextView) : Thread() {
 
         private val mmSocket: BluetoothSocket? by lazy(LazyThreadSafetyMode.NONE) {
             device.createRfcommSocketToServiceRecord( UUID.fromString(VIDEO_SERVER_UUID) )
@@ -74,14 +73,14 @@ class VideoClientConnectThread(private val context: Context, private val device:
 
                     // The connection attempt succeeded. Perform work associated with
                     // the connection in a separate thread.
-                    videoClientRunnerThread.connect(socket, handler)
+                    videoClientRunnerThread?.connect(socket, handler)
                 }
             }
         }
 
         // Closes the client socket and causes the thread to finish.
         fun cancel() {
-            videoClientRunnerThread.disconnect()
+            videoClientRunnerThread?.disconnect()
             try {
                 mmSocket?.close()
             } catch (e: IOException) {

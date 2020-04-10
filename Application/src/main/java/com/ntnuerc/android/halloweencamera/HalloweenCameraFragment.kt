@@ -574,7 +574,7 @@ class HalloweenCameraFragment : Fragment(), View.OnClickListener,
 
         Log.d(TAG,"Trying to set reader")
         if ( ( videoService != null ) && (reader != null) ) {
-            val r = videoService?.getRunner()
+            val r = videoService?.videoClientRunnerThread
             if ( r != null ) {
                 reader?.setVideoService(r)
                 Log.d(TAG,"Trying to set reader success")

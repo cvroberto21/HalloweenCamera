@@ -7,13 +7,15 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.util.Log
 import android.view.Surface
+import java.nio.ByteBuffer
+import java.nio.IntBuffer
 
 //class RGBImageReader(width: Int, height: Int, format: Int = ImageFormat.YUV_420_888, maxImages: Int = 5) {
 class RGBImageReader(width: Int, height: Int, format: Int = ImageFormat.YUV_420_888, maxImages: Int = 5) {
+    private val TAG = "RGBImageReader"
     val jni  = JNILink()
 
     private val imageReader: ImageReader
-    private val TAG = "RGBImageReader"
     private val listener = ImageReader.OnImageAvailableListener {
         val image = it.acquireLatestImage()
         if (image != null ) {
@@ -34,11 +36,8 @@ class RGBImageReader(width: Int, height: Int, format: Int = ImageFormat.YUV_420_
 
     private val lock : Any = Any()
 
-//    private fun makeHandler( looper: Looper): Handler {
-//        return object:Handler( looper ) {
-//
-//        }
-//    }
+    private val framebuffer: FrameBuffer
+
     init {
         Log.d(TAG, "Creating image reader of format $format")
         imageReader = ImageReader.newInstance(width, height, format, maxImages)
@@ -47,7 +46,7 @@ class RGBImageReader(width: Int, height: Int, format: Int = ImageFormat.YUV_420_
         thread.start()
         val handler = Handler(thread.looper)
 
-
+        framebuffer = FrameBuffer( width, height, FrameBuffer.Type.ARGB8888 )
         backgroundHandler = handler
         backgroundThread = thread
 
@@ -57,8 +56,6 @@ class RGBImageReader(width: Int, height: Int, format: Int = ImageFormat.YUV_420_
     fun getSurface(): Surface {
         return imageReader.surface
     }
-
-    private var test = byteArrayOf( 0x01, 0x02, 0x03, 0x04 )
 
     fun processImage(src: Image): String {
         require( src.getFormat() == ImageFormat.YUV_420_888) {
@@ -73,18 +70,18 @@ class RGBImageReader(width: Int, height: Int, format: Int = ImageFormat.YUV_420_
             "src chroma plane must have a pixel stride of 1 or 2: got " + planes[1].pixelStride
         }
 
-        val ret = jni.jbProcessImage( src.width, src.height, planes[0].buffer, planes[1].buffer, planes[2].buffer )
+        val ret = jni.jbProcessImage( src.width, src.height, planes[0].buffer, planes[1].buffer, planes[2].buffer, ByteBuffer.wrap( framebuffer.buffer ) )
 
         if (  planes[0].buffer != null ){
-            videoService.write( test )
-            for ( x in 0..test.size-1 ) {
-                test[x] = ( test[x] + 1 ).toByte()
-            }
+            videoService?.write( framebuffer.buffer )
+//            for ( x in 0..test.size-1 ) {
+//                test[x] = ( test[x] + 1 ).toByte()
+//            }
         }
         return ret
     }
 
-    lateinit private var videoService : VideoClientRunnerThread
+    private var videoService : VideoClientRunnerThread? = null
 
     fun setVideoService( vt : VideoClientRunnerThread ) {
         videoService = vt

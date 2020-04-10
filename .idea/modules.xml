@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Application/Application.iml" filepath="$PROJECT_DIR$/Application/Application.iml" group="HalloweenCamera/Application" />
       <module fileurl="file://$PROJECT_DIR$/HalloweenCamera.iml" filepath="$PROJECT_DIR$/HalloweenCamera.iml" group="HalloweenCamera" />
+      <module fileurl="file://$PROJECT_DIR$/libUtils/libUtils.iml" filepath="$PROJECT_DIR$/libUtils/libUtils.iml" group="HalloweenCamera/libUtils" />
     </modules>
   </component>
 </project>

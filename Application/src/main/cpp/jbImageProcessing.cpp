@@ -18,7 +18,8 @@ extern "C" {
     JNIEXPORT jstring
     JNICALL Java_com_ntnuerc_android_halloweencamera_JNILink_jbProcessImage(
             JNIEnv *pEnv, jobject pThis, jint srcWidth, jint srcHeight,
-            jobject srcPlaneY, jobject srcPlaneU, jobject srcPlaneV) {
+            jobject srcPlaneY, jobject srcPlaneU, jobject srcPlaneV,
+            jobject outBuffer ) {
 
         uint8_t * buf = reinterpret_cast<uint8_t *>( pEnv->GetDirectBufferAddress( srcPlaneY ) );
         LOGD("Running cpp code %dx%d", srcWidth, srcHeight );
