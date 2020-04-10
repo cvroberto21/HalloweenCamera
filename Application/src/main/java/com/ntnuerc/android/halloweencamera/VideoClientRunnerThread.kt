@@ -13,15 +13,12 @@ import java.io.OutputStream
 import kotlinx.android.synthetic.main.fragment_camera2_video.*
 
 class VideoClientRunnerThread( val context: Context, val logView: TextView ) {
+    private val TAG = "VideoClientRunner"
 
-    companion object {
-        private const val TAG = "VideoClientRunner"
-        // Defines several constants used when transmitting messages between the
-        // service and the UI.
-        const val MESSAGE_READ: Int = 0
-        const val MESSAGE_WRITE: Int = 1
-        const val MESSAGE_TOAST: Int = 2
-// ... (Add other message types here as needed.)
+    enum class MessageTypes( val type: Int ) {
+        MESSAGE_READ(0),
+        MESSAGE_WRITE(1 ),
+        MESSAGE_TOAST(2 )
     }
 
     lateinit private var connectThread : ConnectedThread
@@ -101,7 +98,7 @@ class VideoClientRunnerThread( val context: Context, val logView: TextView ) {
                 Log.e(TAG, "Error occurred when sending data", e)
 
                 // Send a failure message back to the activity.
-                val writeErrorMsg = handler.obtainMessage(MESSAGE_TOAST)
+                val writeErrorMsg = handler.obtainMessage( MessageTypes.MESSAGE_TOAST.type )
                 val bundle = Bundle().apply {
                     putString("toast", "Couldn't send data to the other device")
                 }
@@ -112,7 +109,7 @@ class VideoClientRunnerThread( val context: Context, val logView: TextView ) {
 
             // Share the sent message with the UI activity.
             val writtenMsg = handler.obtainMessage(
-                    MESSAGE_WRITE, -1, -1, mmBuffer)
+                    MessageTypes.MESSAGE_WRITE.type , -1, -1, mmBuffer)
             writtenMsg.sendToTarget()
         }
 
