@@ -58,7 +58,7 @@ class RGBImageReader(width: Int, height: Int, format: Int = ImageFormat.YUV_420_
     }
 
     fun processImage(src: Image): String {
-        require( src.getFormat() == ImageFormat.YUV_420_888) {
+        require( src.getFormat() == ImageFormat.YUV_420_888 ) {
             "src must have format YUV_420_888."
         }
 
@@ -70,14 +70,22 @@ class RGBImageReader(width: Int, height: Int, format: Int = ImageFormat.YUV_420_
             "src chroma plane must have a pixel stride of 1 or 2: got " + planes[1].pixelStride
         }
 
-        val ret = jni.jbProcessImage( src.width, src.height, planes[0].buffer, planes[1].buffer, planes[2].buffer, ByteBuffer.wrap( framebuffer.buffer ) )
+        Log.d( TAG, "out ${framebuffer.buff} isDirect: ${framebuffer.buffer} ")
+        Log.d( TAG, "input planes ${planes[0].pixelStride} ${planes[1].pixelStride}  ${planes[2].pixelStride} ${framebuffer.buff}  ")
+        @kotlin.ExperimentalUnsignedTypes
+        val ret = jni.jbProcessImage( src.width, src.height, planes[0].buffer, planes[1].buffer, planes[2].buffer, framebuffer.buff )
 
-        if (  planes[0].buffer != null ){
-            videoService?.write( framebuffer.buffer )
-//            for ( x in 0..test.size-1 ) {
-//                test[x] = ( test[x] + 1 ).toByte()
-//            }
+        for( yi: Int in framebuffer.height / 2 - 3 .. framebuffer.height / 2 + 3  ) {
+            var s = StringBuilder()
+            s.append( "pixels[ ${framebuffer.width/2 - 4 }, $yi]:" )
+            for( xi: Int in framebuffer.width / 2 - 3 .. framebuffer.width / 2 + 3 ) {
+                s.append( String.format(" 0x%08x", framebuffer.getPixel(xi, yi)) )
+            }
+            Log.d( TAG, s.toString() )
         }
+
+        videoService?.write( framebuffer.buffer )
+
         return ret
     }
 
@@ -86,6 +94,4 @@ class RGBImageReader(width: Int, height: Int, format: Int = ImageFormat.YUV_420_
     fun setVideoService( vt : VideoClientRunnerThread ) {
         videoService = vt
     }
-
-
 }
